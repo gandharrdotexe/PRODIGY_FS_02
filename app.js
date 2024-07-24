@@ -7,6 +7,12 @@ const session = require('express-session');
 const app = express();
 const PORT = process.env.PORT || 4000;
 
+// Set the view engine to ejs
+app.set('view engine', 'ejs');
+
+// Set the views directory
+// app.set('views', path.join(__dirname, 'views'));
+
 
 //database connection
 // mongoose.connect(process.env.DB_URI, {useNewParser: true})
@@ -28,7 +34,7 @@ const PORT = process.env.PORT || 4000;
 mongoose.connect(process.env.DB_URI)
   .then((result) => {
     console.log('Connected to MongoDB');
-    app.listen(3000, () => console.log('Server is running on port 3000'));
+    app.listen(3000, () => console.log(`Server is running on port ${PORT}`));
   })
   .catch((err) => console.log(err));
 
