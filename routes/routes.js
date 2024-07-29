@@ -17,10 +17,13 @@ var upload  = multer({
     storage: storage
 }).single('image'); 
 
-router.get('/', (req, res)=>{
-    // res.send('Users Page');
-    res.render('index',{title: 'Home Page', message : req.session.message});
-    delete req.session.message;
+router.get('/', async (req, res) => {
+    try {
+        const users = await User.find();
+        res.render('index', { title: 'Home Page', users: users });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
 });
 
 
@@ -44,6 +47,8 @@ router.post('/add', upload, async (req, res) => {
         res.json({ message: err.message, type: 'danger' });
     }
 });
+
+
 router.get('/add', (req,res)=>{
     res.render('add_users', {title: 'Add Users'})
 })

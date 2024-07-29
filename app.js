@@ -59,6 +59,8 @@ app.use((req, res, next)=>{
     next();
 });
 
+app.use(express.static('uploads'));
+
 //Routes
 app.use('', require('./routes/routes'));
 
@@ -67,5 +69,4 @@ app.use('', require('./routes/routes'));
 app.listen(PORT, (req, res)=>{
     console.log(`Server started at http://localhost:${PORT}`);
 });
-
 
