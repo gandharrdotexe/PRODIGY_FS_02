@@ -51,6 +51,21 @@ router.post('/add', upload, async (req, res) => {
 
 router.get('/add', (req,res)=>{
     res.render('add_users', {title: 'Add Users'})
-})
+});
+
+router.get('/edit/:id', async (req, res) => {
+    let id = req.params.id;
+    try {
+        const user = await User.findById(id);
+        if (!user) {
+            res.redirect('/');
+        } else {
+            res.render('edit_users', { title: 'Edit User Info', user });
+        }
+    } catch (err) {
+        res.redirect('/');
+    }
+});
+
 
 module.exports = router;
