@@ -18,7 +18,28 @@ var upload  = multer({
     storage: storage
 }).single('image'); 
 
-router.get('/', async (req, res) => {
+router.get('/', (req,res)=>{
+  res.render('admin_login', {title: 'Admin Login'})
+});
+
+router.post('/checkLogin', (req, res) => {
+  const { username, password } = req.body;
+
+  // Hardcoded credentials
+  const validUsername = 'admin123';
+  const validPassword = 'password';
+
+  // Check credentials
+  if (username === validUsername && password === validPassword) {
+      // Redirect to /index if credentials are correct
+      res.redirect('/index');
+  } else {
+      // Send a response indicating invalid credentials
+      res.status(401).send('Invalid username or password');
+  }
+});
+
+router.get('/index', async (req, res) => {
     try {
         const users = await User.find();
         res.render('index', { title: 'Home Page', users: users });
@@ -43,7 +64,7 @@ router.post('/add', upload, async (req, res) => {
             message: 'User added successfully'
         };
         console.log(req.session.message);
-        res.redirect('/');
+        res.redirect('/index');
     } catch (err) {
         res.json({ message: err.message, type: 'danger' });
     }
@@ -54,17 +75,19 @@ router.get('/add', (req,res)=>{
     res.render('add_users', {title: 'Add Users'})
 });
 
+
+
 router.get('/edit/:id', async (req, res) => {
     let id = req.params.id;
     try {
         const user = await User.findById(id);
         if (!user) {
-            res.redirect('/');
+            res.redirect('/index');
         } else {
             res.render('edit_users', { title: 'Edit User Info', user });
         }
     } catch (err) {
-        res.redirect('/');
+        res.redirect('/index');
     }
 });
 
@@ -95,7 +118,7 @@ router.post('/update/:id', upload, async (req, res) => {
         message: 'User Updated Successfully',
         type: 'success',
       };
-      res.redirect('/');
+      res.redirect('/index');
     } catch (err) {
       res.json({ message: err.message, type: 'danger' });
     }
@@ -155,7 +178,7 @@ router.get('/delete/:id', async (req, res) => {
         };
       }
   
-      res.redirect('/');
+      res.redirect('/index');
     } catch (err) {
       console.error('Error deleting user:', err);
       res.json({ message: err.message, type: 'danger' });
