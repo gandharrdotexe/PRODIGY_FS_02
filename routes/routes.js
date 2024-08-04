@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/users');
 const multer = require('multer');
+const fs = require('fs');
 
 //image upload
 var storage = multer.diskStorage({
@@ -67,5 +68,98 @@ router.get('/edit/:id', async (req, res) => {
     }
 });
 
+router.post('/update/:id', upload, async (req, res) => {
+    let id = req.params.id;
+    let new_image = '';
+  
+    if (req.file) {
+      new_image = req.file.filename;
+      try {
+        fs.unlinkSync('./uploads/' + req.body.old_image);
+      } catch (err) {
+        console.log(err);
+      }
+    } else {
+      new_image = req.body.old_image;
+    }
+  
+    try {
+      const result = await User.findByIdAndUpdate(id, {
+        name: req.body.name,
+        email: req.body.email,
+        phone: req.body.phone,
+        image: new_image,
+      }, { new: true });
+  
+      req.session.message = {
+        message: 'User Updated Successfully',
+        type: 'success',
+      };
+      res.redirect('/');
+    } catch (err) {
+      res.json({ message: err.message, type: 'danger' });
+    }
+  });
+
+  // Route to delete a user by ID
+// router.get('/delete/:id', async (req, res) => {
+//     try {
+//       const id = req.params.id;
+//       const user = await User.findByIdAndDelete(id);
+      
+//       if (user) {
+//         res.json({
+//           message: 'User deleted successfully',
+//           type: 'success',
+//         });
+//         res.redirect('/');
+//       } else {
+//         res.status(404).json({
+//           message: 'User not found',
+//           type: 'danger',
+//         });
+//       }
+//     } catch (err) {
+//       res.status(500).json({
+//         message: err.message,
+//         type: 'danger',
+//       });
+//     }
+    
+//   });
+
+// Route to delete a user by ID
+router.get('/delete/:id', async (req, res) => {
+    const id = req.params.id;
+  
+    try {
+      const user = await User.findByIdAndDelete(id);
+  
+      if (user && user.image) {
+        try {
+          fs.unlinkSync('./uploads/' + user.image);
+        } catch (err) {
+          console.error('Failed to delete image file:', err);
+        }
+      }
+  
+      if (user) {
+        req.session.message = {
+          message: 'User Deleted successfully',
+          type: 'info',
+        };
+      } else {
+        req.session.message = {
+          message: 'User not found',
+          type: 'danger',
+        };
+      }
+  
+      res.redirect('/');
+    } catch (err) {
+      console.error('Error deleting user:', err);
+      res.json({ message: err.message, type: 'danger' });
+    }
+  });
 
 module.exports = router;
